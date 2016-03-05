@@ -1,9 +1,18 @@
+/*
+ * Copyright (c) 2016 LcfTrans authors
+ * This file is released under the MIT License
+ * http://opensource.org/licenses/MIT
+ */
+
 #include "translation.h"
 
+#include <map>
 #include <regex>
 #include <sstream>
-#include "data.h"
-#include "command_codes.h"
+#include <lcf/data.h>
+#include <lcf/rpg/eventcommand.h>
+#include <lcf/ldb/reader.h>
+#include <lcf/lmu/reader.h>
 
 static std::string escape(const std::string& str) {
 	static std::regex quotation(R"raw(("))raw");
@@ -27,20 +36,21 @@ static std::string formatLines(const std::vector<std::string> lines) {
 	return ret;
 }
 
-static void getStrings(std::vector<std::string>& ret_val, const std::vector<RPG::EventCommand>& list, int index) {
+static void getStrings(std::vector<std::string>& ret_val, const std::vector<lcf::rpg::EventCommand>& list, int index) {
 	// Let's find the choices
 	int current_indent = list[index + 1].indent;
 	unsigned int index_temp = index + 1;
 	std::vector<std::string> s_choices;
 	while (index_temp < list.size()) {
-		if ((list[index_temp].code == Cmd::ShowChoiceOption) && (list[index_temp].indent == current_indent)) {
+		auto code = static_cast<lcf::rpg::EventCommand::Code>(list[index_temp].code);
+		if (code == lcf::rpg::EventCommand::Code::ShowChoiceOption && (list[index_temp].indent == current_indent)) {
 			// Choice found
 			s_choices.push_back(list[index_temp].string);
 		}
 		// If found end of show choice command
-		if (((list[index_temp].code == Cmd::ShowChoiceEnd) && (list[index_temp].indent == current_indent)) ||
+		if ((code == lcf::rpg::EventCommand::Code::ShowChoiceEnd && (list[index_temp].indent == current_indent)) ||
 			// Or found Cancel branch
-			((list[index_temp].code == Cmd::ShowChoiceOption) && (list[index_temp].indent == current_indent) &&
+			(code == lcf::rpg::EventCommand::Code::ShowChoiceOption && (list[index_temp].indent == current_indent) &&
 				(list[index_temp].string == ""))) {
 
 			break;
@@ -118,12 +128,12 @@ bool Translation::addEntry(const Entry& entry) {
 Translation* Translation::fromLDB(const std::string& filename, const std::string& encoding) {
 	Translation* t = new Translation();
 
-	LDB_Reader::Load(filename, "1252");
+	lcf::LDB_Reader::Load(filename, "1252");
 
 	Entry e;
 
-	for (size_t i = 0; i < Data::actors.size(); ++i) {
-		const RPG::Actor& actor = Data::actors[i];
+	for (size_t i = 0; i < lcf::Data::actors.size(); ++i) {
+		const lcf::rpg::Actor& actor = lcf::Data::actors[i];
 
 		e.original = actor.name;
 		e.context = "actor.name";
@@ -141,8 +151,8 @@ Translation* Translation::fromLDB(const std::string& filename, const std::string
 		t->addEntry(e);
 	}
 
-	for (size_t i = 0; i < Data::classes.size(); ++i) {
-		const RPG::Class& cls = Data::classes[i];
+	for (size_t i = 0; i < lcf::Data::classes.size(); ++i) {
+		const lcf::rpg::Class& cls = lcf::Data::classes[i];
 
 		e.original = cls.name;
 		e.context = "cls.name";
@@ -150,8 +160,8 @@ Translation* Translation::fromLDB(const std::string& filename, const std::string
 		t->addEntry(e);
 	}
 
-	for (size_t i = 0; i < Data::skills.size(); ++i) {
-		const RPG::Skill& skill = Data::skills[i];
+	for (size_t i = 0; i < lcf::Data::skills.size(); ++i) {
+		const lcf::rpg::Skill& skill = lcf::Data::skills[i];
 
 		e.original = skill.name;
 		e.context = "skill.name";
@@ -174,8 +184,8 @@ Translation* Translation::fromLDB(const std::string& filename, const std::string
 		t->addEntry(e);
 	}
 
-	for (size_t i = 0; i < Data::items.size(); ++i) {
-		const RPG::Item& item = Data::items[i];
+	for (size_t i = 0; i < lcf::Data::items.size(); ++i) {
+		const lcf::rpg::Item& item = lcf::Data::items[i];
 
 		e.original = item.name;
 		e.context = "item.name";
@@ -188,8 +198,8 @@ Translation* Translation::fromLDB(const std::string& filename, const std::string
 		t->addEntry(e);
 	}
 
-	for (size_t i = 0; i < Data::enemies.size(); ++i) {
-		const RPG::Enemy& enemy = Data::enemies[i];
+	for (size_t i = 0; i < lcf::Data::enemies.size(); ++i) {
+		const lcf::rpg::Enemy& enemy = lcf::Data::enemies[i];
 
 		e.original = enemy.name;
 		e.context = "enemy.name";
@@ -197,8 +207,8 @@ Translation* Translation::fromLDB(const std::string& filename, const std::string
 		t->addEntry(e);
 	}
 
-	for (size_t i = 0; i < Data::states.size(); ++i) {
-		const RPG::State& state = Data::states[i];
+	for (size_t i = 0; i < lcf::Data::states.size(); ++i) {
+		const lcf::rpg::State& state = lcf::Data::states[i];
 
 		e.original = state.name;
 		e.context = "state.name";
@@ -231,8 +241,8 @@ Translation* Translation::fromLDB(const std::string& filename, const std::string
 		t->addEntry(e);
 	}
 
-	for (size_t i = 0; i < Data::battlecommands.commands.size(); ++i) {
-		const RPG::BattleCommand& bcmd = Data::battlecommands.commands[i];
+	for (size_t i = 0; i < lcf::Data::battlecommands.commands.size(); ++i) {
+		const lcf::rpg::BattleCommand& bcmd = lcf::Data::battlecommands.commands[i];
 
 		e.original = bcmd.name;
 		e.context = "bcmd.name";
@@ -241,624 +251,624 @@ Translation* Translation::fromLDB(const std::string& filename, const std::string
 	}
 
 	// ToDo: Check for new RPG2k
-	e.original = "%S" + Data::terms.encounter;
+	e.original = "%S" + lcf::Data::terms.encounter;
 	e.context = "term";
 	e.info = "Term: Battle encounter\n%S: Enemy name";
 	t->addEntry(e);
 
-	e.original = Data::terms.special_combat;
+	e.original = lcf::Data::terms.special_combat;
 	e.context = "term";
 	e.info = "Term: Battle surprise attack";
 	t->addEntry(e);
 
-	e.original = Data::terms.escape_success;
+	e.original = lcf::Data::terms.escape_success;
 	e.context = "term";
 	e.info = "Term: Battle escape success";
 	t->addEntry(e);
 
-	e.original = Data::terms.escape_failure;
+	e.original = lcf::Data::terms.escape_failure;
 	e.context = "term";
 	e.info = "Term: Battle escape failed";
 	t->addEntry(e);
 
-	e.original = Data::terms.victory;
+	e.original = lcf::Data::terms.victory;
 	e.context = "term";
 	e.info = "Term: Battle victory";
 	t->addEntry(e);
 
-	e.original = Data::terms.defeat;
+	e.original = lcf::Data::terms.defeat;
 	e.context = "term";
 	e.info = "Term: Battle defeat";
 	t->addEntry(e);
 
-	e.original = "%V %U" + Data::terms.exp_received;
+	e.original = "%V %U" + lcf::Data::terms.exp_received;
 	e.context = "term";
 	e.info = "Term: Battle exp received\n%V: EXP amount\n%U: EXP term";
 	t->addEntry(e);
 
-	e.original = Data::terms.gold_recieved_a + "%V%U" + Data::terms.gold_recieved_b;
+	e.original = lcf::Data::terms.gold_recieved_a + "%V%U" + lcf::Data::terms.gold_recieved_b;
 	e.context = "term";
 	e.info = "Term: Battle gold received\n%V: Gold amount\n%U: Gold term";
 	t->addEntry(e);
 
-	e.original = "%S" + Data::terms.item_recieved;
+	e.original = "%S" + lcf::Data::terms.item_recieved;
 	e.context = "term";
 	e.info = "Term: Battle item received\n%S: Item name";
 	t->addEntry(e);
 
-	e.original = "%S" + Data::terms.attacking;
+	e.original = "%S" + lcf::Data::terms.attacking;
 	e.context = "term";
 	e.info = "Term: Battle attack\n%S: Source name";
 	t->addEntry(e);
 
-	e.original = "%S" + Data::terms.actor_critical;
+	e.original = "%S" + lcf::Data::terms.actor_critical;
 	e.context = "term";
 	e.info = "Term: Battle ally critical hit\n%S: Source name\n%O: Target name";
 	t->addEntry(e);
 
-	e.original = "%S" + Data::terms.enemy_critical;
+	e.original = "%S" + lcf::Data::terms.enemy_critical;
 	e.context = "term";
 	e.info = "Term: Battle enemy critical hit\n%S: Source name\n%O: Target name";
 	t->addEntry(e);
 
-	e.original = "%S" + Data::terms.defending;
+	e.original = "%S" + lcf::Data::terms.defending;
 	e.context = "term";
 	e.info = "Term: Battle defending\n%S: Source name";
 	t->addEntry(e);
 
-	e.original = "%S" + Data::terms.observing;
+	e.original = "%S" + lcf::Data::terms.observing;
 	e.context = "term";
 	e.info = "Term: Battle observing\n%S: Source name";
 	t->addEntry(e);
 
-	e.original = "%S" + Data::terms.focus;
+	e.original = "%S" + lcf::Data::terms.focus;
 	e.context = "term";
 	e.info = "Term: Battle focus\n%S: Source name";
 	t->addEntry(e);
 
-	e.original = "%S" + Data::terms.autodestruction;
+	e.original = "%S" + lcf::Data::terms.autodestruction;
 	e.context = "term";
 	e.info = "Term: Battle autodestruct\n%S: Source name";
 	t->addEntry(e);
 
-	e.original = "%S" + Data::terms.enemy_escape;
+	e.original = "%S" + lcf::Data::terms.enemy_escape;
 	e.context = "term";
 	e.info = "Term: Battle enemy escape\n%S: Source name";
 	t->addEntry(e);
 
-	e.original = "%S" + Data::terms.enemy_transform;
+	e.original = "%S" + lcf::Data::terms.enemy_transform;
 	e.context = "term";
 	e.info = "Term: Battle enemy transform\n%S: Source name";
 	t->addEntry(e);
 
-	e.original = "%S %V" + Data::terms.enemy_damaged;
+	e.original = "%S %V" + lcf::Data::terms.enemy_damaged;
 	e.context = "term";
 	e.info = "Term: Battle enemy damaged\n%S: Source name\n%V: Damage amount";
 	t->addEntry(e);
 
-	e.original = "%S" + Data::terms.enemy_undamaged;
+	e.original = "%S" + lcf::Data::terms.enemy_undamaged;
 	e.context = "term";
 	e.info = "Term: Battle enemy undamaged\n%S: Target name";
 	t->addEntry(e);
 
-	e.original = "%S %V" + Data::terms.actor_damaged;
+	e.original = "%S %V" + lcf::Data::terms.actor_damaged;
 	e.context = "term";
 	e.info = "Term: Battle actor damaged\n%S: Source name\n%V: Damage amount";
 	t->addEntry(e);
 
-	e.original = "%S" + Data::terms.actor_undamaged;
+	e.original = "%S" + lcf::Data::terms.actor_undamaged;
 	e.context = "term";
 	e.info = "Term: Battle actor undamaged\n%S: Target name";
 	t->addEntry(e);
 
-	e.original = "%O" + Data::terms.skill_failure_a;
+	e.original = "%O" + lcf::Data::terms.skill_failure_a;
 	e.context = "term";
 	e.info = "Term: Battle skill failure a\n%S: Source name\n%O: Target name";
 	t->addEntry(e);
 
-	e.original = "%O" + Data::terms.skill_failure_b;
+	e.original = "%O" + lcf::Data::terms.skill_failure_b;
 	e.context = "term";
 	e.info = "Term: Battle skill failure b\n%S: Source name\n%O: Target name";
 	t->addEntry(e);
 
-	e.original = "%O" + Data::terms.skill_failure_c;
+	e.original = "%O" + lcf::Data::terms.skill_failure_c;
 	e.context = "term";
 	e.info = "Term: Battle skill failure c\n%S: Source name\n%O: Target name";
 	t->addEntry(e);
 
-	e.original = "%O" + Data::terms.dodge;
+	e.original = "%O" + lcf::Data::terms.dodge;
 	e.context = "term";
 	e.info = "Term: Battle dodge\n%S: Source name\n%O: Target name";
 	t->addEntry(e);
 
-	e.original = "%S %O" + Data::terms.use_item;
+	e.original = "%S %O" + lcf::Data::terms.use_item;
 	e.context = "term";
 	e.info = "Term: Battle use item\n%S: Source name\n%O: Item name";
 	t->addEntry(e);
 
-	e.original = "%S" + Data::terms.hp_recovery ;
+	e.original = "%S" + lcf::Data::terms.hp_recovery ;
 	e.context = "term";
 	e.info = "Term: Battle hp recovery\n%S: Source name\n%V: HP amount\n%U: HP term";
 	t->addEntry(e);
 
-	e.original = "%S %V %U" + Data::terms.parameter_increase;
+	e.original = "%S %V %U" + lcf::Data::terms.parameter_increase;
 	e.context = "term";
 	e.info = "Term: Battle parameter increase\n%S: Source name\n%V: Parameter amount\n%U: Parameter term";
 	t->addEntry(e);
 
-	e.original = "%S %V %U" + Data::terms.parameter_decrease;
+	e.original = "%S %V %U" + lcf::Data::terms.parameter_decrease;
 	e.context = "term";
 	e.info = "Term: Battle parameter decrease\n%S: Source name\n%V: Parameter amount\n%U: Parameter term";
 	t->addEntry(e);
 
-	e.original = "%S %V %U" + Data::terms.actor_hp_absorbed;
+	e.original = "%S %V %U" + lcf::Data::terms.actor_hp_absorbed;
 	e.context = "term";
 	e.info = "Term: Battle actor_hp_absorbed\n%S: Source name\n%O: Target name\n%V: Parameter amount\n%U: Parameter term";
 	t->addEntry(e);
 
-	e.original = "%S %V %U" + Data::terms.enemy_hp_absorbed;
+	e.original = "%S %V %U" + lcf::Data::terms.enemy_hp_absorbed;
 	e.context = "term";
 	e.info = "Term: Battle enemy_hp_absorbed\n%S: Source name\n%O: Target name\n%V: Parameter amount\n%U: Parameter term";
 	t->addEntry(e);
 
-	e.original = "%S %O" + Data::terms.resistance_increase;
+	e.original = "%S %O" + lcf::Data::terms.resistance_increase;
 	e.context = "term";
 	e.info = "Term: Battle resistance_increase\n%S: Source name\n%O: Parameter term";
 	t->addEntry(e);
 
-	e.original = "%S %O" + Data::terms.resistance_decrease;
+	e.original = "%S %O" + lcf::Data::terms.resistance_decrease;
 	e.context = "term";
 	e.info = "Term: Battle resistance_decrease\n%S: Source name\n%O: Parameter term";
 	t->addEntry(e);
 
-	e.original = "%S %V %U" + Data::terms.level_up;
+	e.original = "%S %V %U" + lcf::Data::terms.level_up;
 	e.context = "term";
 	e.info = "Term: Battle level_up\n%S: Source name\n%U: Level\n%V: Level term";
 	t->addEntry(e);
 
-	e.original = "%S" + Data::terms.skill_learned;
+	e.original = "%S" + lcf::Data::terms.skill_learned;
 	e.context = "term";
 	e.info = "Term: Battle skill_learned\n%S: Source name\n%O: Skill name";
 	t->addEntry(e);
 
-	e.original = Data::terms.battle_start;
+	e.original = lcf::Data::terms.battle_start;
 	e.context = "term";
 	e.info = "Term: battle_start";
 	t->addEntry(e);
 
-	e.original = Data::terms.miss;
+	e.original = lcf::Data::terms.miss;
 	e.context = "term";
 	e.info = "Term: miss";
 	t->addEntry(e);
 
-	e.original = Data::terms.shop_greeting1;
+	e.original = lcf::Data::terms.shop_greeting1;
 	e.context = "term";
 	e.info = "Term: shop_greeting1";
 	t->addEntry(e);
 
-	e.original = Data::terms.shop_regreeting1;
+	e.original = lcf::Data::terms.shop_regreeting1;
 	e.context = "term";
 	e.info = "Term: shop_regreeting1";
 	t->addEntry(e);
 
-	e.original = Data::terms.shop_buy1;
+	e.original = lcf::Data::terms.shop_buy1;
 	e.context = "term";
 	e.info = "Term: shop_buy1";
 	t->addEntry(e);
 
-	e.original = Data::terms.shop_sell1;
+	e.original = lcf::Data::terms.shop_sell1;
 	e.context = "term";
 	e.info = "Term: shop_sell1";
 	t->addEntry(e);
 
-	e.original = Data::terms.shop_leave1;
+	e.original = lcf::Data::terms.shop_leave1;
 	e.context = "term";
 	e.info = "Term: shop_leave1";
 	t->addEntry(e);
 
-	e.original = Data::terms.shop_buy_select1;
+	e.original = lcf::Data::terms.shop_buy_select1;
 	e.context = "term";
 	e.info = "Term: shop_buy_select1";
 	t->addEntry(e);
 
-	e.original = Data::terms.shop_buy_number1;
+	e.original = lcf::Data::terms.shop_buy_number1;
 	e.context = "term";
 	e.info = "Term: shop_buy_number1";
 	t->addEntry(e);
 
-	e.original = Data::terms.shop_purchased1;
+	e.original = lcf::Data::terms.shop_purchased1;
 	e.context = "term";
 	e.info = "Term: shop_purchased1";
 	t->addEntry(e);
 
-	e.original = Data::terms.shop_sell_select1;
+	e.original = lcf::Data::terms.shop_sell_select1;
 	e.context = "term";
 	e.info = "Term: shop_sell_select1";
 	t->addEntry(e);
 
-	e.original = Data::terms.shop_sell_number1;
+	e.original = lcf::Data::terms.shop_sell_number1;
 	e.context = "term";
 	e.info = "Term: shop_sell_number1";
 	t->addEntry(e);
 
-	e.original = Data::terms.shop_sold1;
+	e.original = lcf::Data::terms.shop_sold1;
 	e.context = "term";
 	e.info = "Term: shop_sold1";
 	t->addEntry(e);
 
-	e.original = Data::terms.shop_greeting2;
+	e.original = lcf::Data::terms.shop_greeting2;
 	e.context = "term";
 	e.info = "Term: shop_greeting2";
 	t->addEntry(e);
 
-	e.original = Data::terms.shop_regreeting2;
+	e.original = lcf::Data::terms.shop_regreeting2;
 	e.context = "term";
 	e.info = "Term: shop_regreeting2";
 	t->addEntry(e);
 
-	e.original = Data::terms.shop_buy2;
+	e.original = lcf::Data::terms.shop_buy2;
 	e.context = "term";
 	e.info = "Term: shop_buy2";
 	t->addEntry(e);
 
-	e.original = Data::terms.shop_sell2;
+	e.original = lcf::Data::terms.shop_sell2;
 	e.context = "term";
 	e.info = "Term: shop_sell2";
 	t->addEntry(e);
 
-	e.original = Data::terms.shop_leave2;
+	e.original = lcf::Data::terms.shop_leave2;
 	e.context = "term";
 	e.info = "Term: shop_leave2";
 	t->addEntry(e);
 
-	e.original = Data::terms.shop_buy_select2;
+	e.original = lcf::Data::terms.shop_buy_select2;
 	e.context = "term";
 	e.info = "Term: shop_buy_select2";
 	t->addEntry(e);
 
-	e.original = Data::terms.shop_buy_number2;
+	e.original = lcf::Data::terms.shop_buy_number2;
 	e.context = "term";
 	e.info = "Term: shop_buy_number2";
 	t->addEntry(e);
 
-	e.original = Data::terms.shop_purchased2;
+	e.original = lcf::Data::terms.shop_purchased2;
 	e.context = "term";
 	e.info = "Term: shop_purchased2";
 	t->addEntry(e);
 
-	e.original = Data::terms.shop_sell_select2;
+	e.original = lcf::Data::terms.shop_sell_select2;
 	e.context = "term";
 	e.info = "Term: shop_sell_select2";
 	t->addEntry(e);
 
-	e.original = Data::terms.shop_sell_number2;
+	e.original = lcf::Data::terms.shop_sell_number2;
 	e.context = "term";
 	e.info = "Term: shop_sell_number2";
 	t->addEntry(e);
 
-	e.original = Data::terms.shop_sold2;
+	e.original = lcf::Data::terms.shop_sold2;
 	e.context = "term";
 	e.info = "Term: shop_sold2";
 	t->addEntry(e);
 
-	e.original = Data::terms.shop_greeting3;
+	e.original = lcf::Data::terms.shop_greeting3;
 	e.context = "term";
 	e.info = "Term: shop_greeting3";
 	t->addEntry(e);
 
-	e.original = Data::terms.shop_regreeting3;
+	e.original = lcf::Data::terms.shop_regreeting3;
 	e.context = "term";
 	e.info = "Term: shop_regreeting3";
 	t->addEntry(e);
 
-	e.original = Data::terms.shop_buy3;
+	e.original = lcf::Data::terms.shop_buy3;
 	e.context = "term";
 	e.info = "Term: shop_buy3";
 	t->addEntry(e);
 
-	e.original = Data::terms.shop_sell3;
+	e.original = lcf::Data::terms.shop_sell3;
 	e.context = "term";
 	e.info = "Term: shop_sell3";
 	t->addEntry(e);
 
-	e.original = Data::terms.shop_leave3;
+	e.original = lcf::Data::terms.shop_leave3;
 	e.context = "term";
 	e.info = "Term: shop_leave3";
 	t->addEntry(e);
 
-	e.original = Data::terms.shop_buy_select3;
+	e.original = lcf::Data::terms.shop_buy_select3;
 	e.context = "term";
 	e.info = "Term: shop_buy_select3";
 	t->addEntry(e);
 
-	e.original = Data::terms.shop_buy_number3;
+	e.original = lcf::Data::terms.shop_buy_number3;
 	e.context = "term";
 	e.info = "Term: shop_buy_number3";
 	t->addEntry(e);
 
-	e.original = Data::terms.shop_purchased3;
+	e.original = lcf::Data::terms.shop_purchased3;
 	e.context = "term";
 	e.info = "Term: shop_purchased3";
 	t->addEntry(e);
 
-	e.original = Data::terms.shop_sell_select3;
+	e.original = lcf::Data::terms.shop_sell_select3;
 	e.context = "term";
 	e.info = "Term: shop_sell_select3";
 	t->addEntry(e);
 
-	e.original = Data::terms.shop_sell_number3;
+	e.original = lcf::Data::terms.shop_sell_number3;
 	e.context = "term";
 	e.info = "Term: shop_sell_number3";
 	t->addEntry(e);
 
-	e.original = Data::terms.shop_sold3;
+	e.original = lcf::Data::terms.shop_sold3;
 	e.context = "term";
 	e.info = "Term: shop_sold3";
 	t->addEntry(e);
 
 	// greeting 1 and 2 concated because it's one sentence
-	e.original = Data::terms.inn_a_greeting_1 + "%V%U" + Data::terms.inn_a_greeting_2;
+	e.original = lcf::Data::terms.inn_a_greeting_1 + "%V%U" + lcf::Data::terms.inn_a_greeting_2;
 	e.context = "term";
 	e.info = "Term: inn_a_greeting_1\n%V: Gold amount\n%U: Gold term";
 	t->addEntry(e);
 
-	e.original = Data::terms.inn_a_greeting_3;
+	e.original = lcf::Data::terms.inn_a_greeting_3;
 	e.context = "term";
 	e.info = "Term: inn_a_greeting_2";
 	t->addEntry(e);
 
-	e.original = Data::terms.inn_a_accept;
+	e.original = lcf::Data::terms.inn_a_accept;
 	e.context = "term";
 	e.info = "Term: inn_a_accept";
 	t->addEntry(e);
 
-	e.original = Data::terms.inn_a_cancel;
+	e.original = lcf::Data::terms.inn_a_cancel;
 	e.context = "term";
 	e.info = "Term: inn_a_cancel";
 	t->addEntry(e);
 
 	// greeting 1 and 2 concated because it's one sentence
-	e.original = Data::terms.inn_b_greeting_1 + "%V%U" + Data::terms.inn_b_greeting_2;
+	e.original = lcf::Data::terms.inn_b_greeting_1 + "%V%U" + lcf::Data::terms.inn_b_greeting_2;
 	e.context = "term";
 	e.info = "Term: inn_b_greeting_1\n%V: Gold amount\n%U: Gold term";
 	t->addEntry(e);
 
-	e.original = Data::terms.inn_b_greeting_3;
+	e.original = lcf::Data::terms.inn_b_greeting_3;
 	e.context = "term";
 	e.info = "Term: inn_b_greeting_2";
 	t->addEntry(e);
 
-	e.original = Data::terms.inn_b_accept;
+	e.original = lcf::Data::terms.inn_b_accept;
 	e.context = "term";
 	e.info = "Term: inn_b_accept";
 	t->addEntry(e);
 
-	e.original = Data::terms.inn_b_cancel;
+	e.original = lcf::Data::terms.inn_b_cancel;
 	e.context = "term";
 	e.info = "Term: inn_b_cancel";
 	t->addEntry(e);
 
-	e.original = Data::terms.possessed_items;
+	e.original = lcf::Data::terms.possessed_items;
 	e.context = "term";
 	e.info = "Term: possessed_items";
 	t->addEntry(e);
 
-	e.original = Data::terms.equipped_items;
+	e.original = lcf::Data::terms.equipped_items;
 	e.context = "term";
 	e.info = "Term: equipped_items";
 	t->addEntry(e);
 
-	e.original = Data::terms.gold;
+	e.original = lcf::Data::terms.gold;
 	e.context = "term";
 	e.info = "Term: gold";
 	t->addEntry(e);
 
-	e.original = Data::terms.battle_fight;
+	e.original = lcf::Data::terms.battle_fight;
 	e.context = "term";
 	e.info = "Term: battle_fight";
 	t->addEntry(e);
 
-	e.original = Data::terms.battle_auto;
+	e.original = lcf::Data::terms.battle_auto;
 	e.context = "term";
 	e.info = "Term: battle_auto";
 	t->addEntry(e);
 
-	e.original = Data::terms.battle_escape;
+	e.original = lcf::Data::terms.battle_escape;
 	e.context = "term";
 	e.info = "Term: battle_escape";
 	t->addEntry(e);
 
-	e.original = Data::terms.command_attack;
+	e.original = lcf::Data::terms.command_attack;
 	e.context = "term";
 	e.info = "Term: command_attack";
 	t->addEntry(e);
 
-	e.original = Data::terms.command_defend;
+	e.original = lcf::Data::terms.command_defend;
 	e.context = "term";
 	e.info = "Term: command_defend";
 	t->addEntry(e);
 
-	e.original = Data::terms.command_item;
+	e.original = lcf::Data::terms.command_item;
 	e.context = "term";
 	e.info = "Term: command_item";
 	t->addEntry(e);
 
-	e.original = Data::terms.command_skill;
+	e.original = lcf::Data::terms.command_skill;
 	e.context = "term";
 	e.info = "Term: command_skill";
 	t->addEntry(e);
 
-	e.original = Data::terms.menu_equipment;
+	e.original = lcf::Data::terms.menu_equipment;
 	e.context = "term";
 	e.info = "Term: menu_equipment";
 	t->addEntry(e);
 
-	e.original = Data::terms.menu_save;
+	e.original = lcf::Data::terms.menu_save;
 	e.context = "term";
 	e.info = "Term: menu_save";
 	t->addEntry(e);
 
-	e.original = Data::terms.menu_quit;
+	e.original = lcf::Data::terms.menu_quit;
 	e.context = "term";
 	e.info = "Term: menu_quit";
 	t->addEntry(e);
 
-	e.original = Data::terms.new_game;
+	e.original = lcf::Data::terms.new_game;
 	e.context = "term";
 	e.info = "Term: new_game";
 	t->addEntry(e);
 
-	e.original = Data::terms.load_game;
+	e.original = lcf::Data::terms.load_game;
 	e.context = "term";
 	e.info = "Term: load_game";
 	t->addEntry(e);
 
-	e.original = Data::terms.exit_game;
+	e.original = lcf::Data::terms.exit_game;
 	e.context = "term";
 	e.info = "Term: exit_game";
 	t->addEntry(e);
 
-	e.original = Data::terms.status;
+	e.original = lcf::Data::terms.status;
 	e.context = "term";
 	e.info = "Term: status";
 	t->addEntry(e);
 
-	e.original = Data::terms.row;
+	e.original = lcf::Data::terms.row;
 	e.context = "term";
 	e.info = "Term: row";
 	t->addEntry(e);
 
-	e.original = Data::terms.order;
+	e.original = lcf::Data::terms.order;
 	e.context = "term";
 	e.info = "Term: order";
 	t->addEntry(e);
 
-	e.original = Data::terms.wait_on;
+	e.original = lcf::Data::terms.wait_on;
 	e.context = "term";
 	e.info = "Term: wait_on";
 	t->addEntry(e);
 
-	e.original = Data::terms.wait_off;
+	e.original = lcf::Data::terms.wait_off;
 	e.context = "term";
 	e.info = "Term: wait_off";
 	t->addEntry(e);
 
-	e.original = Data::terms.level;
+	e.original = lcf::Data::terms.level;
 	e.context = "term";
 	e.info = "Term: level";
 	t->addEntry(e);
 
-	e.original = Data::terms.health_points;
+	e.original = lcf::Data::terms.health_points;
 	e.context = "term";
 	e.info = "Term: health_points";
 	t->addEntry(e);
 
-	e.original = Data::terms.spirit_points;
+	e.original = lcf::Data::terms.spirit_points;
 	e.context = "term";
 	e.info = "Term: spirit_points";
 	t->addEntry(e);
 
-	e.original = Data::terms.normal_status;
+	e.original = lcf::Data::terms.normal_status;
 	e.context = "term";
 	e.info = "Term: normal_status";
 	t->addEntry(e);
 
-	e.original = Data::terms.exp_short;
+	e.original = lcf::Data::terms.exp_short;
 	e.context = "term";
 	e.info = "Term: exp_short";
 	t->addEntry(e);
 
-	e.original = Data::terms.lvl_short;
+	e.original = lcf::Data::terms.lvl_short;
 	e.context = "term";
 	e.info = "Term: lvl_short";
 	t->addEntry(e);
 
-	e.original = Data::terms.hp_short;
+	e.original = lcf::Data::terms.hp_short;
 	e.context = "term";
 	e.info = "Term: hp_short";
 	t->addEntry(e);
 
-	e.original = Data::terms.sp_short;
+	e.original = lcf::Data::terms.sp_short;
 	e.context = "term";
 	e.info = "Term: sp_short";
 	t->addEntry(e);
 
-	e.original = Data::terms.sp_cost;
+	e.original = lcf::Data::terms.sp_cost;
 	e.context = "term";
 	e.info = "Term: sp_cost";
 	t->addEntry(e);
 
-	e.original = Data::terms.attack;
+	e.original = lcf::Data::terms.attack;
 	e.context = "term";
 	e.info = "Term: attack";
 	t->addEntry(e);
 
-	e.original = Data::terms.defense;
+	e.original = lcf::Data::terms.defense;
 	e.context = "term";
 	e.info = "Term: defense";
 	t->addEntry(e);
 
-	e.original = Data::terms.spirit;
+	e.original = lcf::Data::terms.spirit;
 	e.context = "term";
 	e.info = "Term: spirit";
 	t->addEntry(e);
 
-	e.original = Data::terms.agility;
+	e.original = lcf::Data::terms.agility;
 	e.context = "term";
 	e.info = "Term: agility";
 	t->addEntry(e);
 
-	e.original = Data::terms.weapon;
+	e.original = lcf::Data::terms.weapon;
 	e.context = "term";
 	e.info = "Term: weapon";
 	t->addEntry(e);
 
-	e.original = Data::terms.shield;
+	e.original = lcf::Data::terms.shield;
 	e.context = "term";
 	e.info = "Term: shield";
 	t->addEntry(e);
 
-	e.original = Data::terms.armor;
+	e.original = lcf::Data::terms.armor;
 	e.context = "term";
 	e.info = "Term: armor";
 	t->addEntry(e);
 
-	e.original = Data::terms.helmet;
+	e.original = lcf::Data::terms.helmet;
 	e.context = "term";
 	e.info = "Term: helmet";
 	t->addEntry(e);
 
-	e.original = Data::terms.accessory;
+	e.original = lcf::Data::terms.accessory;
 	e.context = "term";
 	e.info = "Term: accessory";
 	t->addEntry(e);
 
-	e.original = Data::terms.save_game_message;
+	e.original = lcf::Data::terms.save_game_message;
 	e.context = "term";
 	e.info = "Term: save_game_message";
 	t->addEntry(e);
 
-	e.original = Data::terms.load_game_message;
+	e.original = lcf::Data::terms.load_game_message;
 	e.context = "term";
 	e.info = "Term: load_game_message";
 	t->addEntry(e);
 
-	e.original = Data::terms.file;
+	e.original = lcf::Data::terms.file;
 	e.context = "term";
 	e.info = "Term: file";
 	t->addEntry(e);
 
-	e.original = Data::terms.exit_game_message;
+	e.original = lcf::Data::terms.exit_game_message;
 	e.context = "term";
 	e.info = "Term: exit_game_message";
 	t->addEntry(e);
 
-	e.original = Data::terms.yes;
+	e.original = lcf::Data::terms.yes;
 	e.context = "term";
 	e.info = "Term: yes";
 	t->addEntry(e);
 
-	e.original = Data::terms.no;
+	e.original = lcf::Data::terms.no;
 	e.context = "term";
 	e.info = "Term: no";
 	t->addEntry(e);
@@ -867,19 +877,19 @@ Translation* Translation::fromLDB(const std::string& filename, const std::string
 	bool has_message = false;
 	std::vector<std::string> choices;
 
-	for (size_t i = 0; i < Data::commonevents.size(); ++i) {
+	for (size_t i = 0; i < lcf::Data::commonevents.size(); ++i) {
 		int evt_count = i + 1;
 
-		const std::vector<RPG::EventCommand>& events = Data::commonevents[i].event_commands;
+		const std::vector<lcf::rpg::EventCommand>& events = lcf::Data::commonevents[i].event_commands;
 		for (size_t j = 0; j < events.size(); ++j) {
-			const RPG::EventCommand& evt = events[j];
+			const lcf::rpg::EventCommand& evt = events[j];
 			int line_count = j + 1;
 
 			e.info = "Common Event " + std::to_string(evt_count) + ", Line " + std::to_string(line_count);
 			e.context = "event";
 
-			switch (evt.code) {
-			case Cmd::ShowMessage:
+			switch (static_cast<lcf::rpg::EventCommand::Code>(evt.code)) {
+			case lcf::rpg::EventCommand::Code::ShowMessage:
 				if (has_message) {
 					// New message
 					if (!e.original.empty()) {
@@ -892,7 +902,7 @@ Translation* Translation::fromLDB(const std::string& filename, const std::string
 				e.original = evt.string + "\n";
 
 				break;
-			case Cmd::ShowMessage_2:
+			case lcf::rpg::EventCommand::Code::ShowMessage_2:
 				if (!has_message) {
 					// shouldn't happen
 					e.original = "";
@@ -901,7 +911,7 @@ Translation* Translation::fromLDB(const std::string& filename, const std::string
 				// Next message line
 				e.original += evt.string + "\n";
 				break;
-			case Cmd::ShowChoice:
+			case lcf::rpg::EventCommand::Code::ShowChoice:
 				if (has_message) {
 					has_message = false;
 					if (!e.original.empty()) {
@@ -945,7 +955,7 @@ Translation* Translation::fromLDB(const std::string& filename, const std::string
 }
 
 Translation* Translation::fromLMU(const std::string& filename, const std::string& encoding) {
-	RPG::Map map = *LMU_Reader::Load(filename, encoding);
+	lcf::rpg::Map map = *lcf::LMU_Reader::Load(filename, encoding);
 
 	bool has_message = false;
 	std::vector<std::string> choices;
@@ -953,22 +963,22 @@ Translation* Translation::fromLMU(const std::string& filename, const std::string
 	Translation* t = new Translation();
 
 	for (size_t i = 0; i < map.events.size(); ++i) {
-		const RPG::Event rpg_evt = map.events[i];
+		const lcf::rpg::Event rpg_evt = map.events[i];
 
 		for (size_t j = 0; j < rpg_evt.pages.size(); ++j) {
 			int page_count = j + 1;
-			const RPG::EventPage& page = rpg_evt.pages[j];
+			const lcf::rpg::EventPage& page = rpg_evt.pages[j];
 			Entry e;
 
 			for (size_t k = 0; k < page.event_commands.size(); ++k) {
-				const RPG::EventCommand& evt = page.event_commands[k];
+				const lcf::rpg::EventCommand& evt = page.event_commands[k];
 				int line_count = k + 1;
 
 				e.info = "Event " + std::to_string(rpg_evt.ID) + ", Page " + std::to_string(page_count) + ", Line " + std::to_string(line_count);
 				e.context = "event" + std::to_string(rpg_evt.ID);
 
-				switch (evt.code) {
-				case Cmd::ShowMessage:
+				switch (static_cast<lcf::rpg::EventCommand::Code>(evt.code)) {
+				case lcf::rpg::EventCommand::Code::ShowMessage:
 					if (has_message) {
 						// New message
 						if (!e.original.empty()) {
@@ -981,7 +991,7 @@ Translation* Translation::fromLMU(const std::string& filename, const std::string
 					e.original = evt.string + "\n";
 
 					break;
-				case Cmd::ShowMessage_2:
+				case lcf::rpg::EventCommand::Code::ShowMessage_2:
 					if (!has_message) {
 						// shouldn't happen
 						e.original = "";
@@ -990,7 +1000,7 @@ Translation* Translation::fromLMU(const std::string& filename, const std::string
 					// Next message line
 					e.original += evt.string + "\n";
 					break;
-				case Cmd::ShowChoice:
+				case lcf::rpg::EventCommand::Code::ShowChoice:
 					if (has_message) {
 						has_message = false;
 						if (!e.original.empty()) {

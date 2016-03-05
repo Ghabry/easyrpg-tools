@@ -1,18 +1,14 @@
+/*
+ * Copyright (c) 2016 LcfTrans authors
+ * This file is released under the MIT License
+ * http://opensource.org/licenses/MIT
+ */
+
 #ifndef LCFTRANS_TRANSLATION
 #define LCFTRANS_TRANSLATION
 
-/*
-* Copyright (c) 2016 LcfTrans authors
-* This file is released under the MIT License
-* http://opensource.org/licenses/MIT
-*/
-
 #include <string>
-#include <map>
 #include <vector>
-
-#include "ldb_reader.h"
-#include "lmu_reader.h"
 
 class Translation
 {
