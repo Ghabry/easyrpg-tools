@@ -310,19 +310,19 @@ Translation* Translation::fromLDB(const std::string& filename, const std::string
 
 	e.original = "%S" + lcf::Data::terms.attacking;
 	e.context = "term";
-	e.info = "Term: Battle attack\n%S: Source name";
+	e.info = "Term: Battle normal attack\n%S: Source name";
 	if (e.original != "%S")
 		t->addEntry(e);
 
 	e.original = "%S" + lcf::Data::terms.actor_critical;
 	e.context = "term";
-	e.info = "Term: Battle ally critical hit\n%S: Source name\n%O: Target name";
+	e.info = "Term: Battle ally landed critical hit\n%S: Source name\n%O: Target name";
 	if (e.original != "%S")
 		t->addEntry(e);
 
 	e.original = "%S" + lcf::Data::terms.enemy_critical;
 	e.context = "term";
-	e.info = "Term: Battle enemy critical hit\n%S: Source name\n%O: Target name";
+	e.info = "Term: Battle enemy landed critical hit\n%S: Source name\n%O: Target name";
 	if (e.original != "%S")
 		t->addEntry(e);
 
@@ -346,7 +346,7 @@ Translation* Translation::fromLDB(const std::string& filename, const std::string
 
 	e.original = "%S" + lcf::Data::terms.autodestruction;
 	e.context = "term";
-	e.info = "Term: Battle autodestruct\n%S: Source name";
+	e.info = "Term: Battle enemy autodestruct\n%S: Source name";
 	if (e.original != "%S")
 		t->addEntry(e);
 
@@ -370,7 +370,7 @@ Translation* Translation::fromLDB(const std::string& filename, const std::string
 
 	e.original = "%S" + lcf::Data::terms.enemy_undamaged;
 	e.context = "term";
-	e.info = "Term: Battle enemy undamaged\n%S: Target name";
+	e.info = "Term: Battle enemy not damaged\n%S: Target name";
 	if (e.original != "%S")
 		t->addEntry(e);
 
@@ -382,7 +382,7 @@ Translation* Translation::fromLDB(const std::string& filename, const std::string
 
 	e.original = "%S" + lcf::Data::terms.actor_undamaged;
 	e.context = "term";
-	e.info = "Term: Battle actor undamaged\n%S: Target name";
+	e.info = "Term: Battle actor not damaged\n%S: Target name";
 	if (e.original != "%S")
 		t->addEntry(e);
 
@@ -436,267 +436,267 @@ Translation* Translation::fromLDB(const std::string& filename, const std::string
 
 	e.original = "%S %V %U" + lcf::Data::terms.actor_hp_absorbed;
 	e.context = "term";
-	e.info = "Term: Battle actor_hp_absorbed\n%S: Source name\n%O: Target name\n%V: Parameter amount\n%U: Parameter term";
+	e.info = "Term: Battle actor hp absorbed\n%S: Source name\n%O: Target name\n%V: Parameter amount\n%U: Parameter term";
 	if (e.original != "%S %V %U")
 		t->addEntry(e);
 
 	e.original = "%S %V %U" + lcf::Data::terms.enemy_hp_absorbed;
 	e.context = "term";
-	e.info = "Term: Battle enemy_hp_absorbed\n%S: Source name\n%O: Target name\n%V: Parameter amount\n%U: Parameter term";
+	e.info = "Term: Battle enemy hp absorbed\n%S: Source name\n%O: Target name\n%V: Parameter amount\n%U: Parameter term";
 	if (e.original != "%S %V %U")
 		t->addEntry(e);
 
 	e.original = "%S %O" + lcf::Data::terms.resistance_increase;
 	e.context = "term";
-	e.info = "Term: Battle resistance_increase\n%S: Source name\n%O: Parameter term";
+	e.info = "Term: Battle resistance increase\n%S: Source name\n%O: Parameter term";
 	if (e.original != "%S %O")
 		t->addEntry(e);
 
 	e.original = "%S %O" + lcf::Data::terms.resistance_decrease;
 	e.context = "term";
-	e.info = "Term: Battle resistance_decrease\n%S: Source name\n%O: Parameter term";
+	e.info = "Term: Battle resistance decrease\n%S: Source name\n%O: Parameter term";
 	if (e.original != "%S %O")
 		t->addEntry(e);
 
 	e.original = "%S %V %U" + lcf::Data::terms.level_up;
 	e.context = "term";
-	e.info = "Term: Battle level_up\n%S: Source name\n%U: Level\n%V: Level term";
+	e.info = "Term: Level up\n%S: Source name\n%U: Level\n%V: Level term";
 	if (e.original != "%S %V %U")
 		t->addEntry(e);
 
 	e.original = "%S" + lcf::Data::terms.skill_learned;
 	e.context = "term";
-	e.info = "Term: Battle skill_learned\n%S: Source name\n%O: Skill name";
+	e.info = "Term: Skill learned\n%S: Source name\n%O: Skill name";
 	if (e.original != "%S")
 		t->addEntry(e);
 
 	e.original = lcf::Data::terms.battle_start;
 	e.context = "term";
-	e.info = "Term: battle_start";
+	e.info = "Term: Battle start";
 	t->addEntry(e);
 
 	e.original = lcf::Data::terms.miss;
 	e.context = "term";
-	e.info = "Term: miss";
+	e.info = "Term: Miss (RPG2k3)";
 	t->addEntry(e);
 
 	e.original = lcf::Data::terms.shop_greeting1;
 	e.context = "term";
-	e.info = "Term: shop_greeting1";
+	e.info = "Term: Shop greeting 1";
 	t->addEntry(e);
 
 	e.original = lcf::Data::terms.shop_regreeting1;
 	e.context = "term";
-	e.info = "Term: shop_regreeting1";
+	e.info = "Term: Shop regreeting 1";
 	t->addEntry(e);
 
 	e.original = lcf::Data::terms.shop_buy1;
 	e.context = "term";
-	e.info = "Term: shop_buy1";
+	e.info = "Term: Shop buy 1";
 	t->addEntry(e);
 
 	e.original = lcf::Data::terms.shop_sell1;
 	e.context = "term";
-	e.info = "Term: shop_sell1";
+	e.info = "Term: Shop sell 1";
 	t->addEntry(e);
 
 	e.original = lcf::Data::terms.shop_leave1;
 	e.context = "term";
-	e.info = "Term: shop_leave1";
+	e.info = "Term: Shop leave 1";
 	t->addEntry(e);
 
 	e.original = lcf::Data::terms.shop_buy_select1;
 	e.context = "term";
-	e.info = "Term: shop_buy_select1";
+	e.info = "Term: Shop buy select 1";
 	t->addEntry(e);
 
 	e.original = lcf::Data::terms.shop_buy_number1;
 	e.context = "term";
-	e.info = "Term: shop_buy_number1";
+	e.info = "Term: Shop buy amount 1";
 	t->addEntry(e);
 
 	e.original = lcf::Data::terms.shop_purchased1;
 	e.context = "term";
-	e.info = "Term: shop_purchased1";
+	e.info = "Term: Shop purchased 1";
 	t->addEntry(e);
 
 	e.original = lcf::Data::terms.shop_sell_select1;
 	e.context = "term";
-	e.info = "Term: shop_sell_select1";
+	e.info = "Term: Shop sell select 1";
 	t->addEntry(e);
 
 	e.original = lcf::Data::terms.shop_sell_number1;
 	e.context = "term";
-	e.info = "Term: shop_sell_number1";
+	e.info = "Term: Shop sell amount 1";
 	t->addEntry(e);
 
 	e.original = lcf::Data::terms.shop_sold1;
 	e.context = "term";
-	e.info = "Term: shop_sold1";
+	e.info = "Term: Shop sold 1";
 	t->addEntry(e);
 
 	e.original = lcf::Data::terms.shop_greeting2;
 	e.context = "term";
-	e.info = "Term: shop_greeting2";
+	e.info = "Term: Shop greeting 2";
 	t->addEntry(e);
 
 	e.original = lcf::Data::terms.shop_regreeting2;
 	e.context = "term";
-	e.info = "Term: shop_regreeting2";
+	e.info = "Term: Shop regreeting 2";
 	t->addEntry(e);
 
 	e.original = lcf::Data::terms.shop_buy2;
 	e.context = "term";
-	e.info = "Term: shop_buy2";
+	e.info = "Term: Shop buy 2";
 	t->addEntry(e);
 
 	e.original = lcf::Data::terms.shop_sell2;
 	e.context = "term";
-	e.info = "Term: shop_sell2";
+	e.info = "Term: Shop sell 2";
 	t->addEntry(e);
 
 	e.original = lcf::Data::terms.shop_leave2;
 	e.context = "term";
-	e.info = "Term: shop_leave2";
+	e.info = "Term: Shop leave 2";
 	t->addEntry(e);
 
 	e.original = lcf::Data::terms.shop_buy_select2;
 	e.context = "term";
-	e.info = "Term: shop_buy_select2";
+	e.info = "Term: Shop buy select2";
 	t->addEntry(e);
 
 	e.original = lcf::Data::terms.shop_buy_number2;
 	e.context = "term";
-	e.info = "Term: shop_buy_number2";
+	e.info = "Term: Shop buy amount 2";
 	t->addEntry(e);
 
 	e.original = lcf::Data::terms.shop_purchased2;
 	e.context = "term";
-	e.info = "Term: shop_purchased2";
+	e.info = "Term: Shop purchased 2";
 	t->addEntry(e);
 
 	e.original = lcf::Data::terms.shop_sell_select2;
 	e.context = "term";
-	e.info = "Term: shop_sell_select2";
+	e.info = "Term: Shop sell select 2";
 	t->addEntry(e);
 
 	e.original = lcf::Data::terms.shop_sell_number2;
 	e.context = "term";
-	e.info = "Term: shop_sell_number2";
+	e.info = "Term: Shop sell amount 2";
 	t->addEntry(e);
 
 	e.original = lcf::Data::terms.shop_sold2;
 	e.context = "term";
-	e.info = "Term: shop_sold2";
+	e.info = "Term: Shop sold 2";
 	t->addEntry(e);
 
 	e.original = lcf::Data::terms.shop_greeting3;
 	e.context = "term";
-	e.info = "Term: shop_greeting3";
+	e.info = "Term: Shop greeting 3";
 	t->addEntry(e);
 
 	e.original = lcf::Data::terms.shop_regreeting3;
 	e.context = "term";
-	e.info = "Term: shop_regreeting3";
+	e.info = "Term: Shop regreeting 3";
 	t->addEntry(e);
 
 	e.original = lcf::Data::terms.shop_buy3;
 	e.context = "term";
-	e.info = "Term: shop_buy3";
+	e.info = "Term: Shop buy 3";
 	t->addEntry(e);
 
 	e.original = lcf::Data::terms.shop_sell3;
 	e.context = "term";
-	e.info = "Term: shop_sell3";
+	e.info = "Term: shop sell 3";
 	t->addEntry(e);
 
 	e.original = lcf::Data::terms.shop_leave3;
 	e.context = "term";
-	e.info = "Term: shop_leave3";
+	e.info = "Term: Shop leave 3";
 	t->addEntry(e);
 
 	e.original = lcf::Data::terms.shop_buy_select3;
 	e.context = "term";
-	e.info = "Term: shop_buy_select3";
+	e.info = "Term: Shop buy select 3";
 	t->addEntry(e);
 
 	e.original = lcf::Data::terms.shop_buy_number3;
 	e.context = "term";
-	e.info = "Term: shop_buy_number3";
+	e.info = "Term: Shop buy amount 3";
 	t->addEntry(e);
 
 	e.original = lcf::Data::terms.shop_purchased3;
 	e.context = "term";
-	e.info = "Term: shop_purchased3";
+	e.info = "Term: Shop purchased 3";
 	t->addEntry(e);
 
 	e.original = lcf::Data::terms.shop_sell_select3;
 	e.context = "term";
-	e.info = "Term: shop_sell_select3";
+	e.info = "Term: Shop sell select 3";
 	t->addEntry(e);
 
 	e.original = lcf::Data::terms.shop_sell_number3;
 	e.context = "term";
-	e.info = "Term: shop_sell_number3";
+	e.info = "Term: Shop sell amount 3";
 	t->addEntry(e);
 
 	e.original = lcf::Data::terms.shop_sold3;
 	e.context = "term";
-	e.info = "Term: shop_sold3";
+	e.info = "Term: Shop sold 3";
 	t->addEntry(e);
 
 	// greeting 1 and 2 combined because it's one sentence
 	e.original = lcf::Data::terms.inn_a_greeting_1 + "%V%U" + lcf::Data::terms.inn_a_greeting_2;
 	e.context = "term";
-	e.info = "Term: inn_a_greeting_1\n%V: Gold amount\n%U: Gold term";
+	e.info = "Term: Inn A greeting 1\n%V: Gold amount\n%U: Gold term";
 	if (e.original != "%V%U")
 		t->addEntry(e);
 
 	e.original = lcf::Data::terms.inn_a_greeting_3;
 	e.context = "term";
-	e.info = "Term: inn_a_greeting_2";
+	e.info = "Term: Inn A greeting 2";
 	t->addEntry(e);
 
 	e.original = lcf::Data::terms.inn_a_accept;
 	e.context = "term";
-	e.info = "Term: inn_a_accept";
+	e.info = "Term: Inn A accept";
 	t->addEntry(e);
 
 	e.original = lcf::Data::terms.inn_a_cancel;
 	e.context = "term";
-	e.info = "Term: inn_a_cancel";
+	e.info = "Term: Inn A cancel";
 	t->addEntry(e);
 
 	// greeting 1 and 2 combined because it's one sentence
 	e.original = lcf::Data::terms.inn_b_greeting_1 + "%V%U" + lcf::Data::terms.inn_b_greeting_2;
 	e.context = "term";
-	e.info = "Term: inn_b_greeting_1\n%V: Gold amount\n%U: Gold term";
+	e.info = "Term: Inn B greeting 1\n%V: Gold amount\n%U: Gold term";
 	if (e.original != "%V%U")
 		t->addEntry(e);
 
 	e.original = lcf::Data::terms.inn_b_greeting_3;
 	e.context = "term";
-	e.info = "Term: inn_b_greeting_2";
+	e.info = "Term: Inn B greeting 2";
 	t->addEntry(e);
 
 	e.original = lcf::Data::terms.inn_b_accept;
 	e.context = "term";
-	e.info = "Term: inn_b_accept";
+	e.info = "Term: Inn B accept";
 	t->addEntry(e);
 
 	e.original = lcf::Data::terms.inn_b_cancel;
 	e.context = "term";
-	e.info = "Term: inn_b_cancel";
+	e.info = "Term: Inn B cancel";
 	t->addEntry(e);
 
 	e.original = lcf::Data::terms.possessed_items;
 	e.context = "term";
-	e.info = "Term: possessed_items";
+	e.info = "Term: Shop owned items";
 	t->addEntry(e);
 
 	e.original = lcf::Data::terms.equipped_items;
 	e.context = "term";
-	e.info = "Term: equipped_items";
+	e.info = "Term: Shop equipped items";
 	t->addEntry(e);
 
 	e.original = lcf::Data::terms.gold;
@@ -706,212 +706,212 @@ Translation* Translation::fromLDB(const std::string& filename, const std::string
 
 	e.original = lcf::Data::terms.battle_fight;
 	e.context = "term";
-	e.info = "Term: battle_fight";
+	e.info = "Term: Battle fight";
 	t->addEntry(e);
 
 	e.original = lcf::Data::terms.battle_auto;
 	e.context = "term";
-	e.info = "Term: battle_auto";
+	e.info = "Term: Battle auto";
 	t->addEntry(e);
 
 	e.original = lcf::Data::terms.battle_escape;
 	e.context = "term";
-	e.info = "Term: battle_escape";
+	e.info = "Term: Battle escape";
 	t->addEntry(e);
 
 	e.original = lcf::Data::terms.command_attack;
 	e.context = "term";
-	e.info = "Term: command_attack";
+	e.info = "Term: Battle command attack";
 	t->addEntry(e);
 
 	e.original = lcf::Data::terms.command_defend;
 	e.context = "term";
-	e.info = "Term: command_defend";
+	e.info = "Term: Battle command defend";
 	t->addEntry(e);
 
 	e.original = lcf::Data::terms.command_item;
 	e.context = "term";
-	e.info = "Term: command_item";
+	e.info = "Term: Battle command item";
 	t->addEntry(e);
 
 	e.original = lcf::Data::terms.command_skill;
 	e.context = "term";
-	e.info = "Term: command_skill";
+	e.info = "Term: Battle command skill";
 	t->addEntry(e);
 
 	e.original = lcf::Data::terms.menu_equipment;
 	e.context = "term";
-	e.info = "Term: menu_equipment";
+	e.info = "Term: Menu equipment";
 	t->addEntry(e);
 
 	e.original = lcf::Data::terms.menu_save;
 	e.context = "term";
-	e.info = "Term: menu_save";
+	e.info = "Term: Menu save";
 	t->addEntry(e);
 
 	e.original = lcf::Data::terms.menu_quit;
 	e.context = "term";
-	e.info = "Term: menu_quit";
+	e.info = "Term: Menu quit";
 	t->addEntry(e);
 
 	e.original = lcf::Data::terms.new_game;
 	e.context = "term";
-	e.info = "Term: new_game";
+	e.info = "Term: New game";
 	t->addEntry(e);
 
 	e.original = lcf::Data::terms.load_game;
 	e.context = "term";
-	e.info = "Term: load_game";
+	e.info = "Term: Load game";
 	t->addEntry(e);
 
 	e.original = lcf::Data::terms.exit_game;
 	e.context = "term";
-	e.info = "Term: exit_game";
+	e.info = "Term: Exit game";
 	t->addEntry(e);
 
 	e.original = lcf::Data::terms.status;
 	e.context = "term";
-	e.info = "Term: status";
+	e.info = "Term: Status";
 	t->addEntry(e);
 
 	e.original = lcf::Data::terms.row;
 	e.context = "term";
-	e.info = "Term: row";
+	e.info = "Term: Row";
 	t->addEntry(e);
 
 	e.original = lcf::Data::terms.order;
 	e.context = "term";
-	e.info = "Term: order";
+	e.info = "Term: Order";
 	t->addEntry(e);
 
 	e.original = lcf::Data::terms.wait_on;
 	e.context = "term";
-	e.info = "Term: wait_on";
+	e.info = "Term: ATB wait on";
 	t->addEntry(e);
 
 	e.original = lcf::Data::terms.wait_off;
 	e.context = "term";
-	e.info = "Term: wait_off";
+	e.info = "Term: ATB wait off";
 	t->addEntry(e);
 
 	e.original = lcf::Data::terms.level;
 	e.context = "term";
-	e.info = "Term: level";
+	e.info = "Term: Level";
 	t->addEntry(e);
 
 	e.original = lcf::Data::terms.health_points;
 	e.context = "term";
-	e.info = "Term: health_points";
+	e.info = "Term: Health points";
 	t->addEntry(e);
 
 	e.original = lcf::Data::terms.spirit_points;
 	e.context = "term";
-	e.info = "Term: spirit_points";
+	e.info = "Term: Spirit points";
 	t->addEntry(e);
 
 	e.original = lcf::Data::terms.normal_status;
 	e.context = "term";
-	e.info = "Term: normal_status";
+	e.info = "Term: Normal status";
 	t->addEntry(e);
 
 	e.original = lcf::Data::terms.exp_short;
 	e.context = "term";
-	e.info = "Term: exp_short";
+	e.info = "Term: Exp short";
 	t->addEntry(e);
 
 	e.original = lcf::Data::terms.lvl_short;
 	e.context = "term";
-	e.info = "Term: lvl_short";
+	e.info = "Term: Level short";
 	t->addEntry(e);
 
 	e.original = lcf::Data::terms.hp_short;
 	e.context = "term";
-	e.info = "Term: hp_short";
+	e.info = "Term: HP short";
 	t->addEntry(e);
 
 	e.original = lcf::Data::terms.sp_short;
 	e.context = "term";
-	e.info = "Term: sp_short";
+	e.info = "Term: SP short";
 	t->addEntry(e);
 
 	e.original = lcf::Data::terms.sp_cost;
 	e.context = "term";
-	e.info = "Term: sp_cost";
+	e.info = "Term: SP cost";
 	t->addEntry(e);
 
 	e.original = lcf::Data::terms.attack;
 	e.context = "term";
-	e.info = "Term: attack";
+	e.info = "Term: Attack stat";
 	t->addEntry(e);
 
 	e.original = lcf::Data::terms.defense;
 	e.context = "term";
-	e.info = "Term: defense";
+	e.info = "Term: Defense stat";
 	t->addEntry(e);
 
 	e.original = lcf::Data::terms.spirit;
 	e.context = "term";
-	e.info = "Term: spirit";
+	e.info = "Term: Spirit stat";
 	t->addEntry(e);
 
 	e.original = lcf::Data::terms.agility;
 	e.context = "term";
-	e.info = "Term: agility";
+	e.info = "Term: Agility stat";
 	t->addEntry(e);
 
 	e.original = lcf::Data::terms.weapon;
 	e.context = "term";
-	e.info = "Term: weapon";
+	e.info = "Term: Weapon equipment";
 	t->addEntry(e);
 
 	e.original = lcf::Data::terms.shield;
 	e.context = "term";
-	e.info = "Term: shield";
+	e.info = "Term: Shield equipment";
 	t->addEntry(e);
 
 	e.original = lcf::Data::terms.armor;
 	e.context = "term";
-	e.info = "Term: armor";
+	e.info = "Term: Armor equipment";
 	t->addEntry(e);
 
 	e.original = lcf::Data::terms.helmet;
 	e.context = "term";
-	e.info = "Term: helmet";
+	e.info = "Term: Helmet equipment";
 	t->addEntry(e);
 
 	e.original = lcf::Data::terms.accessory;
 	e.context = "term";
-	e.info = "Term: accessory";
+	e.info = "Term: Accessory equipment";
 	t->addEntry(e);
 
 	e.original = lcf::Data::terms.save_game_message;
 	e.context = "term";
-	e.info = "Term: save_game_message";
+	e.info = "Term: Save game message";
 	t->addEntry(e);
 
 	e.original = lcf::Data::terms.load_game_message;
 	e.context = "term";
-	e.info = "Term: load_game_message";
+	e.info = "Term: Load game message";
 	t->addEntry(e);
 
 	e.original = lcf::Data::terms.file;
 	e.context = "term";
-	e.info = "Term: file";
+	e.info = "Term: File";
 	t->addEntry(e);
 
 	e.original = lcf::Data::terms.exit_game_message;
 	e.context = "term";
-	e.info = "Term: exit_game_message";
+	e.info = "Term: Exit game message";
 	t->addEntry(e);
 
 	e.original = lcf::Data::terms.yes;
 	e.context = "term";
-	e.info = "Term: yes";
+	e.info = "Term: Yes";
 	t->addEntry(e);
 
 	e.original = lcf::Data::terms.no;
 	e.context = "term";
-	e.info = "Term: no";
+	e.info = "Term: No";
 	t->addEntry(e);
 
 	// Read common events
