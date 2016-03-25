@@ -31,6 +31,10 @@ These are the currently available tools:
 
    Syntax: `xyz2png file1 [... fileN]`
 
+ * GENCACHE: generates a JSON cache file of game directory contents.
+
+   Syntax: `gencache [Options] [Directory]`
+
  * xyz-thumbnailer: displays thumbnails for XYZ files in your file manager
                     (currently Windows and Linux/GTK3 only)
 

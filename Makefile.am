@@ -16,4 +16,8 @@ if ENABLE_XYZ2PNG
 SUBDIRS += xyz2png
 endif
 
+if ENABLE_GENCACHE
+SUBDIRS += gencache
+endif
+
 EXTRA_DIST = README.md
