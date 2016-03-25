@@ -21,6 +21,7 @@ Makefile.in
 aclocal.m4
 config.h
 config.h.in
+config.h.in~
 config.log
 config.status
 configure
@@ -39,3 +40,5 @@ xyz2png/xyz2png
 xyz2png/Makefile
 png2xyz/png2xyz
 png2xyz/Makefile
+gencache/gencache
+gencache/Makefile
