@@ -19,14 +19,14 @@ static std::string escape(const std::string& str) {
 	static std::regex quotation(R"raw(("))raw");
 	static std::regex backslash(R"raw((\\))raw");
 
-	return std::regex_replace(std::regex_replace(str, quotation, "\"$1"), backslash, "\\$1");
+	return std::regex_replace(std::regex_replace(str, backslash, "\\$1"), quotation, "\\$1");
 }
 
 static std::string unescape(const std::string& str) {
 	static std::regex quotation(R"raw((""))raw");
 	static std::regex backslash(R"raw((\\\\))raw");
 
-	return std::regex_replace(std::regex_replace(str, quotation, "\""), backslash, "\\");
+	return std::regex_replace(std::regex_replace(str, backslash, "\"$1"), quotation, "\\$1");
 }
 
 static std::string formatLines(const std::vector<std::string> lines) {
