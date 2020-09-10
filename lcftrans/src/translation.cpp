@@ -10,10 +10,12 @@
 #include <regex>
 #include <sstream>
 #include <fstream>
+#include <lcf/context.h>
 #include <lcf/data.h>
 #include <lcf/rpg/eventcommand.h>
 #include <lcf/ldb/reader.h>
 #include <lcf/lmu/reader.h>
+#include <lcf/rpg/database.h>
 
 static std::string escape(const std::string& str) {
 	static std::regex quotation(R"raw(("))raw");
@@ -38,6 +40,7 @@ static std::string formatLines(const std::vector<std::string> lines) {
 }
 
 static void getStrings(std::vector<std::string>& ret_val, const std::vector<lcf::rpg::EventCommand>& list, int index) {
+#if 0
 	// Let's find the choices
 	int current_indent = list[index + 1].indent;
 	unsigned int index_temp = index + 1;
@@ -60,6 +63,7 @@ static void getStrings(std::vector<std::string>& ret_val, const std::vector<lcf:
 		index_temp++;
 	}
 	ret_val.swap(s_choices);
+#endif
 }
 
 Translation::Translation() {
@@ -135,6 +139,153 @@ Translation* Translation::fromLDB(const std::string& filename, const std::string
 
 	lcf::LDB_Reader::Load(filename, encoding);
 
+	auto chunks = { "actors", "classes", "skills", "items", "enemies", "states", "terms" };
+
+	std::vector<std::vector<std::string>> fields = {
+		{ "actors", "name", "title", "skill_name" },
+		{ "classes", "name" },
+		{ "skills", "name", "description", "using_message1", "using_message2" },
+		{ "items", "name", "description" },
+		{ "enemies", "name" },
+		{ "states", "name", "message_actor", "message_enemy", "message_already", "message_affected", "message_affected" }
+	};
+
+	// Process non-event strings
+	lcf::rpg::ForEachString(lcf::Data::data, nullptr, [&](lcf::Context<lcf::DBString>& ctx) {
+		if (!ctx.parent || ctx.parent->parent) {
+			// Only care about entries one level deep
+			return;
+		}
+
+		if (!ctx.value->empty()) {
+			lcf::StringView pname = ctx.parent->name;
+			lcf::StringView name = ctx.name;
+
+			if (std::find(chunks.begin(), chunks.end(), pname) == chunks.end()) {
+				return;
+			}
+
+			if (pname != "terms") {
+				for (auto& field : fields) {
+					if (ctx.parent->name == field[0]) {
+						if (std::find(field.begin(), field.end(), name) == field.end()) {
+							return;
+						}
+					}
+				}
+			}
+
+			Entry e;
+			e.original = lcf::ToString(*ctx.value);
+			e.context = lcf::ToString(ctx.parent->name) + "." + lcf::ToString(ctx.name);
+			// e.info
+			t->addEntry(e);
+		}
+	});
+#if 0
+	// Process common events
+	Entry e;
+	lcf::rpg::ForEachString(lcf::Data::data, nullptr, [&](lcf::Context<lcf::DBString>& ctx) {
+		if (!ctx.parent || ctx.parent->name != "commonevents" || ctx.name != "string") {
+			// Only care about the text parameter of common events
+			return;
+		}
+
+		using Cmd = lcf::rpg::EventCommand::Code;
+		const auto& evt = *reinterpret_cast<lcf::rpg::EventCommand*>(ctx.obj);
+
+		// Read common events
+		bool has_message = false;
+		std::vector<std::string> choices;
+
+		switch (static_cast<lcf::rpg::EventCommand::Code>(evt.code)) {
+			case Cmd::ShowMessage:
+				if (has_message) {
+					// New message
+					if (!e.original.empty()) {
+						e.original.pop_back(); // remove \n
+						t->addEntry(e);
+					}
+				}
+
+				e.info = "Common Event " + std::to_string(ctx.parent->index + 1) + ", Line " + std::to_string(line_count);
+				has_message = true;
+				e.original = evt.string + "\n";
+
+				break;
+			case lcf::rpg::EventCommand::Code::ShowMessage_2:
+				if (!has_message) {
+					// shouldn't happen
+					e.original = "";
+				}
+
+				// Next message line
+				e.original += evt.string + "\n";
+				break;
+			case lcf::rpg::EventCommand::Code::ShowChoice:
+				if (has_message) {
+					has_message = false;
+					if (!e.original.empty()) {
+						e.original.pop_back();
+						t->addEntry(e);
+						e.info = "Common Event " + std::to_string(evt_count) + ", Line " + std::to_string(line_count);
+					}
+				}
+
+				e.info = "Common Event " + std::to_string(evt_count) + ", Line " + std::to_string(line_count) + " (Choice)";
+
+				choices.clear();
+				getStrings(choices, events, j);
+				if (!choices.empty()) {
+					e.original = choices[0] + "\n";
+
+					for (size_t choice_i = 1; choice_i < choices.size(); ++choice_i) {
+						e.original += choices[choice_i] + "\n";
+					}
+
+					if (!e.original.empty()) {
+						e.original.pop_back();
+						t->addEntry(e);
+					}
+				}
+
+				break;
+			default:
+				if (has_message) {
+					has_message = false;
+					if (!e.original.empty()) {
+						e.original.pop_back();
+						t->addEntry(e);
+					}
+				}
+				break;
+		}
+	}
+
+		for (size_t i = 0; i < lcf::Data::commonevents.size(); ++i) {
+			int evt_count = i + 1;
+
+			const std::vector<lcf::rpg::EventCommand>& events = lcf::Data::commonevents[i].event_commands;
+			for (size_t j = 0; j < events.size(); ++j) {
+				const lcf::rpg::EventCommand& evt = events[j];
+				int line_count = j + 1;
+
+				e.context = "event";
+
+
+
+			if (has_message) {
+				// Write last event
+				has_message = false;
+				if (!e.original.empty()) {
+					e.original.pop_back();
+					t->addEntry(e);
+				}
+			}
+		}
+	}
+#endif
+#if 0
 	Entry e;
 
 	for (size_t i = 0; i < lcf::Data::actors.size(); ++i) {
@@ -1005,7 +1156,7 @@ Translation* Translation::fromLDB(const std::string& filename, const std::string
 			}
 		}
 	}
-
+#endif
 	return t;
 }
 
@@ -1016,6 +1167,7 @@ Translation* Translation::fromLMU(const std::string& filename, const std::string
 	std::vector<std::string> choices;
 
 	Translation* t = new Translation();
+#if 0
 
 	for (size_t i = 0; i < map.events.size(); ++i) {
 		const lcf::rpg::Event rpg_evt = map.events[i];
@@ -1102,7 +1254,7 @@ Translation* Translation::fromLMU(const std::string& filename, const std::string
 			}
 		}
 	}
-
+#endif
 	return t;
 }
 
