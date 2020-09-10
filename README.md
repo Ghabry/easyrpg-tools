@@ -26,6 +26,10 @@ These are the currently available tools:
  * XYZ2PNG: converts XYZ images into PNG images. It supports wildcards.
 
    Syntax: `xyz2png file1 [... fileN]`
+   
+ * LcfTrans: extracts text out of LDB and LMU files and creates po files.
+ 
+   Syntax: `lcftrans`
 
  * XYZCrush: makes smaller XYZ images. It supports wildcards.
 
