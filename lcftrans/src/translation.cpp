@@ -9,6 +9,7 @@
 #include <map>
 #include <regex>
 #include <sstream>
+#include <fstream>
 #include <lcf/data.h>
 #include <lcf/rpg/eventcommand.h>
 #include <lcf/ldb/reader.h>
@@ -1044,8 +1045,89 @@ Translation* Translation::fromLMU(const std::string& filename, const std::string
 	return t;
 }
 
+static bool starts_with(const std::string& str, const std::string& search) {
+	return str.find(search) == 0;
+}
+
+static std::string extract_string(const std::string& str) {
+	// Extraction of a sub-match
+	std::regex base_regex(R"raw(^.*?"(.*)\n?")raw");
+	std::smatch base_match;
+
+	if (std::regex_match(str, base_match, base_regex)) {
+		if (base_match.size() == 2) {
+			std::ssub_match base_sub_match = base_match[1];
+			std::string base = base_sub_match.str();
+			return unescape(base);
+		}
+	}
+
+	return "";
+}
+
 Translation* Translation::fromPO(const std::string& filename) {
-	return nullptr;
+	// Super simple parser.
+	// Ignores header and comments but good enough for use in liblcf later...
+	
+	Translation* t = new Translation();
+
+	std::ifstream in(filename);
+
+	std::string line;
+	bool found_header = false;
+	bool parse_item = false;
+
+	Entry e;
+
+	while (std::getline(in, line, '\n')) {
+		if (!found_header) {
+			if (starts_with(line, "msgstr")) {
+				found_header = true;
+			}
+			continue;
+		}
+
+		if (!parse_item) {
+			if (starts_with(line, "msgctxt")) {
+				e.context = extract_string(line);
+
+				parse_item = true;
+			} else if (starts_with(line, "msgid")) {
+				parse_item = true;
+
+				goto read_msgid;
+			}
+		} else {
+			if (starts_with(line, "msgid")) {
+			read_msgid:;
+				// Parse multiply lines until empty line or msgstr is encountered
+				e.original = extract_string(line);
+
+				while (std::getline(in, line, '\n')) {
+					if (line.empty() || starts_with(line, "msgstr")) {
+						goto read_msgstr;
+					}
+					e.original += "\n" + extract_string(line);
+				}
+			} else if (starts_with(line, "msgstr")) {
+			read_msgstr:;
+				// Parse multiply lines until empty line or comment
+				e.translation = extract_string(line);
+
+				while (std::getline(in, line, '\n')) {
+					if (line.empty() || starts_with(line, "#")) {
+						break;
+					}
+					e.translation += "\n" + extract_string(line);
+				}
+
+				parse_item = false;
+				t->addEntry(e);
+			}
+		}
+	}
+
+	return t;
 }
 
 static void write_n(std::ostream& out, std::string line, std::string prefix) {
