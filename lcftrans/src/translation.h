@@ -33,6 +33,8 @@ public:
 
 	bool addEntry(const Entry& entry);
 
+	const std::vector<Entry>& getEntries() const;
+
 	static Translation* fromLDB(const std::string& filename, const std::string& encoding);
 	static Translation* fromLMU(const std::string& filename, const std::string& encoding);
 	static Translation* fromPO(const std::string& filename);

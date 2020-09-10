@@ -10,6 +10,7 @@
 #include <fstream>
 #include <iostream>
 #include <sstream>
+#include <vector>
 
 #include <lcf/reader_util.h>
 #include "translation.h"
@@ -124,6 +125,8 @@ std::string GetFilename(const std::string& str)
 void DumpLdb(const std::string& filename, const std::string& encoding) {
 	Translation* t = Translation::fromLDB(filename, encoding);
 
+	std::cout << " " << t->getEntries().size() << " strings" << std::endl;
+
 	std::ofstream outfile(GetFilename(filename) + ".po");
 
 	t->write(outfile);
@@ -131,6 +134,13 @@ void DumpLdb(const std::string& filename, const std::string& encoding) {
 
 void DumpLmu(const std::string& filename, const std::string& encoding) {
 	Translation* t = Translation::fromLMU(filename, encoding);
+
+	if (t->getEntries().empty()) {
+		std::cout << " Skipped... No strings found." << std::endl;
+		return;
+	}
+
+	std::cout << " " << t->getEntries().size() << " strings" << std::endl;
 
 	std::ofstream outfile(GetFilename(filename) + ".po");
 

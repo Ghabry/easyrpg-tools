@@ -126,6 +126,10 @@ bool Translation::addEntry(const Entry& entry) {
 	return true;
 }
 
+const std::vector<Translation::Entry>& Translation::getEntries() const {
+	return entries;
+}
+
 Translation* Translation::fromLDB(const std::string& filename, const std::string& encoding) {
 	Translation* t = new Translation();
 
@@ -1024,8 +1028,6 @@ Translation* Translation::fromLMU(const std::string& filename, const std::string
 			for (size_t k = 0; k < page.event_commands.size(); ++k) {
 				const lcf::rpg::EventCommand& evt = page.event_commands[k];
 				int line_count = k + 1;
-
-				e.context = "event" + std::to_string(rpg_evt.ID);
 
 				switch (static_cast<lcf::rpg::EventCommand::Code>(evt.code)) {
 				case lcf::rpg::EventCommand::Code::ShowMessage:
