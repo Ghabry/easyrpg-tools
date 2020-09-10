@@ -128,7 +128,7 @@ bool Translation::addEntry(const Entry& entry) {
 Translation* Translation::fromLDB(const std::string& filename, const std::string& encoding) {
 	Translation* t = new Translation();
 
-	lcf::LDB_Reader::Load(filename, "1252");
+	lcf::LDB_Reader::Load(filename, encoding);
 
 	Entry e;
 

@@ -11,6 +11,7 @@
 #include <iostream>
 #include <sstream>
 
+#include <lcf/reader_util.h>
 #include "translation.h"
 
 #ifdef _WIN32
@@ -20,20 +21,39 @@
 #endif
 
 #define DATABASE_FILE "rpg_rt.ldb"
+#define INI_FILE "rpg_rt.ini"
 
-void DumpLdb(const std::string& filename);
-void DumpLmu(const std::string& filename);
+void DumpLdb(const std::string& filename, const std::string& encoding);
+void DumpLmu(const std::string& filename, const std::string& encoding);
 
 bool endsWith(std::string const & val, std::string const & ending);
 std::string toLower(std::string const & instr);
 
 int main(int argc, char** argv) {
 	std::string infile;
+	std::string encoding;
 
 	DIR *dirHandle;
 	struct dirent * dirEntry;
 
 	dirHandle = opendir(".");
+	// Read RPG_RT.ini to detect encoding
+	// FIXME: Move Player::GetEncoding and FileFinder from Player to liblcf
+	if (dirHandle) {
+		while (0 != (dirEntry = readdir(dirHandle))) {
+			std::string name = dirEntry->d_name;
+			std::string lname = toLower(name);
+
+			if (lname == INI_FILE) {
+				encoding = lcf::ReaderUtil::GetEncoding(name);
+				break;
+			}
+		}
+		closedir(dirHandle);
+	}
+
+	dirHandle = opendir(".");
+
 	if (dirHandle) {
 		while (0 != (dirEntry = readdir(dirHandle))) {
 			std::string name = dirEntry->d_name;
@@ -41,11 +61,11 @@ int main(int argc, char** argv) {
 
 			if (lname == DATABASE_FILE) {
 				std::cout << "Parsing Database " << name << std::endl;
-				DumpLdb(name);
+				DumpLdb(name, encoding);
 			}
 			else if (endsWith(lname, ".lmu")) {
 				std::cout << "Parsing Map " << name << std::endl;
-				DumpLmu(name);
+				DumpLmu(name, encoding);
 			}
 		}
 		closedir(dirHandle);
@@ -101,16 +121,16 @@ std::string GetFilename(const std::string& str)
 	return s;
 }
 
-void DumpLdb(const std::string& filename) {
-	Translation* t = Translation::fromLDB(filename, "1252");
+void DumpLdb(const std::string& filename, const std::string& encoding) {
+	Translation* t = Translation::fromLDB(filename, encoding);
 
 	std::ofstream outfile(GetFilename(filename) + ".po");
 
 	t->write(outfile);
 }
 
-void DumpLmu(const std::string& filename) {
-	Translation* t = Translation::fromLMU(filename, "1252");
+void DumpLmu(const std::string& filename, const std::string& encoding) {
+	Translation* t = Translation::fromLMU(filename, encoding);
 
 	std::ofstream outfile(GetFilename(filename) + ".po");
 
