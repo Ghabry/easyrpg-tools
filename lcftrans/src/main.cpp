@@ -192,7 +192,7 @@ int main(int argc, char** argv) {
 		std::cerr << "Bad encoding " << encoding << "\n";
 		return 3;
 	}
-	std::cout << "LcfTrans\n";
+	std::cout << "LcfTrans (Deep 8)\n";
 	std::cout << "Using encoding " << encoding << "\n";
 
 	std::sort(source_files.begin(), source_files.end(), [](const auto& a, const auto& b) {

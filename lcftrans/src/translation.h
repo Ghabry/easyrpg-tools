@@ -26,6 +26,7 @@ public:
 	bool addEntry(const Entry& entry);
 
 	const std::vector<Entry>& getEntries() const;
+	std::vector<Entry>& getEntries();
 
 	Translation Merge(const Translation& from);
 

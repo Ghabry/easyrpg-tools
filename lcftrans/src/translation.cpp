@@ -7,6 +7,7 @@
 #include "translation.h"
 #include "types.h"
 #include "utils.h"
+#include "dynrpg.h"
 
 #include <iostream>
 #include <map>
@@ -89,6 +90,10 @@ bool Translation::addEntry(const Entry& entry) {
 }
 
 const std::vector<Entry>& Translation::getEntries() const {
+	return entries;
+}
+
+std::vector<Entry>& Translation::getEntries() {
 	return entries;
 }
 
@@ -221,8 +226,34 @@ public:
 	ParseEvent(Translation& t, const F& make_info) : t(t), make_info(make_info) {}
 
 	void add_evt_entry() {
-		if (lines.empty()) {
+		if (std::all_of(lines.begin(), lines.end(), [](const auto& l) {
+			return Utils::TrimWhitespace(l).empty();
+		})) {
+			lines.clear();
 			info.clear();
+			context.clear();
+			return;
+		}
+
+		if (deep8_lang_else_branch) {
+			if (deep8_msg_pushed == 0) {
+				std::cerr << "FEHLER: Englische Übersetzung länger als Deutsche\n";
+				for (auto& l: lines) {
+					std::cerr << "  TEXT: " << l << "\n";
+					lines.clear();
+					info.clear();
+					context.clear();
+				}
+			} else {
+				auto& entries = t.getEntries();
+				auto& entry = entries[entries.size() - deep8_msg_pushed];
+				entry.translation = lines;
+				lines.clear();
+				info.clear();
+				context.clear();
+				--deep8_msg_pushed;
+				deep8_lang_translated = true;
+			}
 			return;
 		}
 
@@ -234,6 +265,10 @@ public:
 		lines.clear();
 		info.clear();
 		context.clear();
+
+		if (deep8_lang_branch) {
+			++deep8_msg_pushed;
+		}
 	};
 
 	template<typename T>
@@ -253,6 +288,65 @@ public:
 		}
 
 		switch (static_cast<lcf::rpg::EventCommand::Code>(code)) {
+			case Cmd::ConditionalBranch:
+				add_evt_entry();
+				if (ctx.obj->parameters[1] == 426 && ctx.obj->parameters[3] == 1) {
+					if (deep8_lang_branch) {
+						std::cerr << "LANGUAGE innerhalb von LANGUAGE!\n";
+						exit(-1);
+					}
+					deep8_lang_branch = true;
+					deep8_indent = indent;
+				}
+				break;
+			case Cmd::ElseBranch:
+				if (deep8_lang_branch) {
+					if (indent == deep8_indent) {
+						deep8_lang_else_branch = true;
+					}
+				}
+				break;
+			case Cmd::EndBranch:
+				if (deep8_lang_branch) {
+					if (indent == deep8_indent) {
+						deep8_lang_branch = false;
+						deep8_lang_else_branch = false;
+						for (; deep8_msg_pushed > 0; --deep8_msg_pushed) {
+							if (deep8_lang_translated) {
+								auto& entries = t.getEntries();
+								auto& entry = entries[entries.size() - deep8_msg_pushed];
+								entry.translation = { "<easyrpg:delete_page>" };
+							}
+						}
+						deep8_lang_translated = false;
+					}
+				}
+				break;
+			case Cmd::Comment:
+			case Cmd::Comment_2:
+			{
+				if (estring.empty() || estring[0] != '@') {
+					// Not a DynRPG command
+					break;
+				}
+
+				std::string command = ToString(estring);
+				auto args = DynRpg::Invoke(command);
+				if (command == "write_text") {
+					// New message, push old one
+					add_evt_entry();
+					info.push_back(make_info(ctx));
+					lines.push_back(Utils::RemoveControlChars(args[3]));
+				} else if (command == "append_line") {
+					if (lines.empty()) {
+						// shouldn't happen
+						std::cout << "Corrupted event (append_line without write_text) " << evt_id << "@" << line << "\n";
+						break;
+					}
+					lines.push_back(Utils::RemoveControlChars(args[1]));
+				}
+			}
+				break;
 			case Cmd::ShowMessage:
 				// New message, push old one
 				add_evt_entry();
@@ -321,6 +415,12 @@ private:
 
 	Translation& t;
 	const F& make_info;
+
+	bool deep8_lang_branch = false;
+	bool deep8_lang_else_branch = false;
+	bool deep8_lang_translated = false;
+	int deep8_indent = -1;
+	int deep8_msg_pushed = 0;
 };
 
 template<typename ParentType, typename Root, typename F>
@@ -511,7 +611,7 @@ Translation Translation::fromPO(const std::string& filename) {
 					continue;
 				}
 				std::cerr << "Parse error (Line " << line_number << "): Expected \", got " << c << ": " << line << "\n";
-				return "";	
+				return "";
 			}
 
 			if (!slash && c == '\\') {
